@@ -6,6 +6,11 @@ import geopandas as gpd
 import streamlit as st
 import plotly.express as px
 
+import warnings
+
+# Silencia el aviso específico de nombres de columnas mezclados en PyArrow/Streamlit
+warnings.filterwarnings("ignore", category=UserWarning, module="streamlit.dataframe_util")
+
 # --- CONFIGURACIÓN DE PÁGINA STREAMLIT ---
 st.set_page_config(
     page_title="Tablero Agroclimático Nacional",
