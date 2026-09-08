@@ -324,7 +324,7 @@ with tab3:
         
         # Compatibilidad de ancho para tablas
         try:
-            st.dataframe(resumen_estaciones[cols_tabla_est], use_container_width=True)
+            st.dataframe(resumen_estaciones[cols_tabla_est], width="stretch")
         except Exception:
             st.dataframe(resumen_estaciones[cols_tabla_est], width="stretch")
 
