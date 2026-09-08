@@ -270,6 +270,9 @@ with tab2:
         st.download_button("📥 Descargar Tabla en CSV", csv, "datos_agronomicos.csv", "text/csv")
 
 # --- TAB 3: ESTACIONES Y MAPA CON CENTRADO AUTOMÁTICO ---
+import warnings
+
+# --- TAB 3: ESTACIONES Y MAPA CON CENTRADO AUTOMÁTICO ---
 with tab3:
     st.subheader("Estaciones incluidas en la consulta")
 
@@ -287,8 +290,12 @@ with tab3:
         )
 
         est_mapa = estaciones_filtradas.copy()
-        est_mapa["lon"] = est_mapa.geometry.centroid.x.round(4)
-        est_mapa["lat"] = est_mapa.geometry.centroid.y.round(4)
+
+        # Extraer coordenadas evitando la advertencia de CRS geográfico
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            est_mapa["lon"] = est_mapa.geometry.centroid.x.round(4)
+            est_mapa["lat"] = est_mapa.geometry.centroid.y.round(4)
 
         # Si no encontró ninguna columna de texto de nombre, asigna 'Estación <código>'
         if col_nombre_est:
@@ -314,7 +321,12 @@ with tab3:
 
         # Reordenar columnas para visualización clara
         cols_tabla_est = [c for c in ["Código", "Nombre Estación", "Red", "Latitud", "Longitud"] if c in resumen_estaciones.columns]
-        st.dataframe(resumen_estaciones[cols_tabla_est], use_container_width=True)
+        
+        # Compatibilidad de ancho para tablas
+        try:
+            st.dataframe(resumen_estaciones[cols_tabla_est], use_container_width=True)
+        except Exception:
+            st.dataframe(resumen_estaciones[cols_tabla_est], width="stretch")
 
         # Configuración del Mapa con PUNTOS MÁS GRANDES
         mapa_df = resumen_estaciones.dropna(subset=["Latitud", "Longitud"])
@@ -322,7 +334,6 @@ with tab3:
             lat_centro = mapa_df["Latitud"].mean()
             lon_centro = mapa_df["Longitud"].mean()
 
-            # Asignar un tamaño fijo visible para todos los puntos
             mapa_df["tamano_punto"] = 14
 
             params = {
@@ -354,7 +365,10 @@ with tab3:
                     margin={"r": 0, "t": 40, "l": 0, "b": 0}
                 )
 
-            st.plotly_chart(fig_mapa, use_container_width=True)
+            try:
+                st.plotly_chart(fig_mapa, use_container_width=True)
+            except Exception:
+                st.plotly_chart(fig_mapa, width="stretch")
         else:
             st.info("Las estaciones seleccionadas no cuentan con coordenadas lat/lon válidas para graficar en el mapa.")
 
