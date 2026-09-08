@@ -247,7 +247,7 @@ with tab1:
                 title=f"{var_label} ({DICC_MESES[mes_in]}-{DICC_MESES[mes_fi]}) en {prov_sel} ({', '.join(deptos_sel)})",
                 labels={"anio": "Año", var_col: var_label, "red": "Red"}
             )
-        st.plotly_chart(fig, `width='stretch'`)
+        st.plotly_chart(fig, width='stretch')
 
 # --- TAB 2: TABLA DE DATOS ---
 with tab2:
@@ -264,7 +264,7 @@ with tab2:
             pivoted = df_merged.pivot_table(index=["anio", col_nombre_est], columns=["mes", "red"], values=var_col, aggfunc=var_agregacion).reset_index()
 
         pivoted = pivoted.rename(columns={col_nombre_est: "Estación"})
-        st.dataframe(pivoted, `width='stretch'`)
+        st.dataframe(pivoted, width='stretch')
 
         csv = pivoted.to_csv(index=False).encode("utf-8")
         st.download_button("📥 Descargar Tabla en CSV", csv, "datos_agronomicos.csv", "text/csv")
@@ -324,9 +324,9 @@ with tab3:
         
         # Compatibilidad de ancho para tablas
         try:
-            st.dataframe(resumen_estaciones[cols_tabla_est], `width='stretch'`)
+            st.dataframe(resumen_estaciones[cols_tabla_est], width='stretch')
         except Exception:
-            st.dataframe(resumen_estaciones[cols_tabla_est], `width='stretch'`)
+            st.dataframe(resumen_estaciones[cols_tabla_est], width='stretch')
 
         # Configuración del Mapa con PUNTOS MÁS GRANDES
         mapa_df = resumen_estaciones.dropna(subset=["Latitud", "Longitud"])
@@ -366,9 +366,9 @@ with tab3:
                 )
 
             try:
-                st.plotly_chart(fig_mapa, `width='stretch'`)
+                st.plotly_chart(fig_mapa, width='stretch')
             except Exception:
-                st.plotly_chart(fig_mapa, `width='stretch'`)
+                st.plotly_chart(fig_mapa, width='stretch')
         else:
             st.info("Las estaciones seleccionadas no cuentan con coordenadas lat/lon válidas para graficar en el mapa.")
 
@@ -401,7 +401,7 @@ with tab4:
             title=f"Comportamiento de {var_label} por Año y Fase ENSO en {prov_sel}",
             labels={"anio": "Año", var_col: var_label, "fase_enso": "Fase ENSO", "red": "Red"}
         )
-        st.plotly_chart(fig_enso_bar, `width='stretch'`)
+        st.plotly_chart(fig_enso_bar, width='stretch')
         
         st.markdown("---")
         
@@ -434,4 +434,4 @@ with tab4:
                 })
                 .reset_index()
             )
-            st.dataframe(resumen_fase, `width='stretch'`)
+            st.dataframe(resumen_fase, width='stretch')
