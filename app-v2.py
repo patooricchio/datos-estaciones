@@ -324,9 +324,9 @@ with tab3:
         
         # Compatibilidad de ancho para tablas
         try:
-            st.dataframe(resumen_estaciones[cols_tabla_est], `width="stretch"`)
+            st.dataframe(resumen_estaciones[cols_tabla_est], `width='stretch'`)
         except Exception:
-            st.dataframe(resumen_estaciones[cols_tabla_est], `width="stretch"`)
+            st.dataframe(resumen_estaciones[cols_tabla_est], `width='stretch'`)
 
         # Configuración del Mapa con PUNTOS MÁS GRANDES
         mapa_df = resumen_estaciones.dropna(subset=["Latitud", "Longitud"])
@@ -368,7 +368,7 @@ with tab3:
             try:
                 st.plotly_chart(fig_mapa, `width='stretch'`)
             except Exception:
-                st.plotly_chart(fig_mapa, `width="stretch"`)
+                st.plotly_chart(fig_mapa, `width='stretch'`)
         else:
             st.info("Las estaciones seleccionadas no cuentan con coordenadas lat/lon válidas para graficar en el mapa.")
 
@@ -401,7 +401,7 @@ with tab4:
             title=f"Comportamiento de {var_label} por Año y Fase ENSO en {prov_sel}",
             labels={"anio": "Año", var_col: var_label, "fase_enso": "Fase ENSO", "red": "Red"}
         )
-        st.plotly_chart(fig_enso_bar, `width='stretch')
+        st.plotly_chart(fig_enso_bar, `width='stretch'`)
         
         st.markdown("---")
         
