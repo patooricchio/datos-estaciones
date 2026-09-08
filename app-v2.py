@@ -419,7 +419,7 @@ with tab4:
                 title=f"Distribución de {var_label} según Fase ENSO",
                 labels={"fase_enso": "Fase ENSO", var_col: var_label}
             )
-            st.plotly_chart(fig_box, `width='stretch'`)
+            st.plotly_chart(fig_box, width='stretch')
             
         with col_c2:
             st.markdown("##### Resumen Numérico por Fase")
