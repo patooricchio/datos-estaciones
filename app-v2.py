@@ -79,70 +79,24 @@ def cargar_estaciones():
     )
     return gdf
 
-@st.cache_data(show_spinner="Procesando archivos .DAT y .txt...")
+@st.cache_data(show_spinner="Cargando datos climáticos optimizados...")
 def cargar_datos_diarios():
     archivo_cache = BASE_DIR / "datos_cache.parquet"
 
-    if archivo_cache.exists():
-        return pd.read_parquet(archivo_cache)
-
-    extensiones = ("*.DAT", "*.dat", "*.txt", "*.TXT")
-    archivos_datos = []
-    for ext in extensiones:
-        archivos_datos.extend(DIR_DATOS_CRUDOS.rglob(ext))
-
-    archivos_datos = list(set(archivos_datos))
-
-    if not archivos_datos:
+    if not archivo_cache.exists():
         return pd.DataFrame()
 
-    patron = re.compile(
-        r"^(\d{5})(\d{4})(\d{2})(\d{2})\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)\s*(-?\d+\.\d+)(\d{5,6})"
-    )
+    # Cargar solo las columnas estrictamente necesarias
+    cols = ["codigo_limpio", "red", "fecha", "anio", "mes", "tmax", "tmin", "precip"]
+    df = pd.read_parquet(archivo_cache, columns=cols)
 
-    datos = []
-    append_dato = datos.append
-
-    for ruta in archivos_datos:
-        origen = "INTA" if "inta" in str(ruta).lower() else "SMN"
-        try:
-            with open(ruta, "r", encoding="utf-8", errors="ignore") as f:
-                for linea in f:
-                    match = patron.match(linea.strip())
-                    if match:
-                        est, a, m, d, tmax, tmin, precip, _ = match.groups()
-                        tm = float(tmax)
-                        tn = float(tmin)
-                        pr = float(precip)
-
-                        append_dato({
-                            "station_id": est,
-                            "red": origen,
-                            "fecha": f"{a}-{m}-{d}",
-                            "anio": int(a),
-                            "mes": int(m),
-                            "dia": int(d),
-                            "tmax": tm if tm > -90 else np.nan,
-                            "tmin": tn if tn > -90 else np.nan,
-                            "precip": pr if pr >= 0 else 0.0,
-                        })
-        except Exception:
-            continue
-
-    df = pd.DataFrame(datos)
-    if not df.empty:
-        df["fecha"] = pd.to_datetime(df["fecha"])
-        df["codigo_limpio"] = (
-            df["station_id"]
-            .astype(str)
-            .str.strip()
-            .str.replace(r"^50", "", regex=True)
-            .str.zfill(5)
-        )
-        try:
-            df.to_parquet(archivo_cache, index=False)
-        except Exception:
-            pass
+    # Optimización extrema de memoria RAM
+    df["anio"] = df["anio"].astype("int16")
+    df["mes"] = df["mes"].astype("int8")
+    df["tmax"] = df["tmax"].astype("float32")
+    df["tmin"] = df["tmin"].astype("float32")
+    df["precip"] = df["precip"].astype("float32")
+    df["red"] = df["red"].astype("category")
 
     return df
 
@@ -269,7 +223,8 @@ with tab2:
             pivoted = df_merged.pivot_table(index=["anio", col_nombre_est], columns=["mes", "red"], values=var_col, aggfunc=var_agregacion).reset_index()
 
         pivoted = pivoted.rename(columns={col_nombre_est: "Estación"})
-        st.dataframe(pivoted, width='stretch')
+        st.dataframe(pivoted.head(2000), width="stretch")
+        st.caption("ℹ️ Mostrando las primeras 2.000 filas. Descarga el CSV para obtener el total completo.")
 
         csv = pivoted.to_csv(index=False).encode("utf-8")
         st.download_button("📥 Descargar Tabla en CSV", csv, "datos_agronomicos.csv", "text/csv")
